@@ -2,30 +2,18 @@ import { Router } from "express";
 import { userRouter } from "./user";
 import { spaceRouter } from "./space";
 import { adminRouter } from "./admin";
+import { SigninController, SignupController } from "../../controllers/index";
 
 
 export const router = Router();
 
 
-router.post("/signup", (req,res)=>{
-    res.json({
-        message:"signup success",
-    })
-})
+router.post("/signup", SignupController)
+router.post("/signin", SigninController)
 
-router.post("/signin", (req,res)=>{
-    res.json({
-        message:"signin success",
-    })
-})
+router.get("/element",)
 
-router.get("/element", (req,res)=>{
-
-})
-
-router.get("/avatars", (req,res)=>{
-
-})
+router.get("/avatars",)
 
 
 router.use("/user", userRouter);
