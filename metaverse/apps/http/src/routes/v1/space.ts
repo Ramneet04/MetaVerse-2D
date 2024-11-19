@@ -1,27 +1,19 @@
 import { Router } from "express";
+import { userMiddleware } from "../../middlewares/user";
+import { AddElementInSpace, CreateSpace, DeleteElementInSpace, DeleteSpace, GetAllSpaces } from "../../controllers/space";
 
 
 export const spaceRouter = Router();
 
-spaceRouter.post("/", (req,res)=>{
+spaceRouter.post("/",userMiddleware, CreateSpace)
 
-})
+spaceRouter.delete("/:spaceId",userMiddleware, DeleteSpace);
 
-spaceRouter.delete("/:spaceId", (req,res)=>{
+spaceRouter.get("/all",userMiddleware, GetAllSpaces)
 
-})
+spaceRouter.post("/element",userMiddleware, AddElementInSpace)
 
-spaceRouter.get("/all", (req,res)=>{
-
-})
-
-spaceRouter.post("/element", (req,res)=>{
-
-})
-
-spaceRouter.delete("/element", (req,res)=>{
-
-})
+spaceRouter.delete("/element",userMiddleware, DeleteElementInSpace)
 
 spaceRouter.get("/:spaceId", (req,res)=>{
     

@@ -36,11 +36,17 @@ export const OthersMetadataController = async (req: Request, res: Response)=>{
             avatar: true
         }
     })
-
-    const ans= metadata.map( val  =>(
+    interface MetadataItem {
+        id: string;
+        avatar?: {
+            imageUrl: string;
+        };
+    }
+    // interface IKeys { userId: string; avatarId: string }
+    const ans= metadata.map( (val: MetadataItem) => (
         {
             userId: val.id,
-            avatarId: val.avatar?.imageUrl
+            avatarId: val.avatar?.imageUrl || ""
         }
     ))
     res.json({
