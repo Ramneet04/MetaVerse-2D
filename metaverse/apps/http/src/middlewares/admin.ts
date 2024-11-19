@@ -14,20 +14,23 @@ export const adminMiddleware = (req: Request, res: Response, next: NextFunction)
     const header = req.headers["authorization"];
     const token = header?.split(" ")[1];
     if(!token){
-        return res.status(403).json({message: "Unauthorized"})
+        res.status(403).json({message: "Unauthorized"});
+        return;
     }
 
     try {
         const decoded = jwt.verify(token, JWT_PASSWORD) as {role: string, userId: string};
         if(decoded.role !== "Admin"){
-            return res.status(403).json({message: "Unauthorized"})
+            res.status(403).json({message: "Unauthorized"});
+            return;
         }
         req.userId = decoded.userId;
         next();
 
     } catch (error) {
-        return res.status(403).json({
+        res.status(403).json({
             message: "Invalid token",
         })
+        return;
     }
 }

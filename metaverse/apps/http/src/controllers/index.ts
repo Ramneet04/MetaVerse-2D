@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { SigninSchema, SignupSchema } from "../types";
 const client = require("@repo/db/client");
-
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { JWT_PASSWORD } from "../config";
+
 export const SignupController = async (req: Request, res: Response)=>{
     const parsedData = SignupSchema.safeParse(req.body);
     if(!parsedData.success){
@@ -67,4 +67,28 @@ export const SigninController = async ( req: Request, res: Response) => {
         message: "Internal server error"
        }) 
     }
+}
+
+export const GetAvailableElements = async (req: Request, res: Response)=>{
+    try {
+        const elements = await client.element.findMany();
+        res.status(200).json(elements); //make sure it works
+        return;
+    } catch (error) {
+        res.status(400).json({
+            message: "Internal server error"
+        })
+    }
+}
+
+export const GetAvailableAvatars = async (req: Request, res: Response)=>{
+    try {
+        const avatar = await client.avatar.findMany();
+        res.status(200).json(avatar);
+        return;
+    } catch (error) {
+        res.status(400).json({
+            message: "Internal server error"
+        })
+    } 
 }

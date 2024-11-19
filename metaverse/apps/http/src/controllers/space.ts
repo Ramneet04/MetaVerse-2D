@@ -165,6 +165,7 @@ export const AddElementInSpace = async (req: Request, res: Response)=>{
     })
     return;
 }
+
 export const DeleteElementInSpace = async (req: Request, res: Response)=>{
     
     const parsedData = DeleteElementSchema.safeParse(req.body);
@@ -173,7 +174,66 @@ export const DeleteElementInSpace = async (req: Request, res: Response)=>{
         res.status(400).json({message: "Invalid data"});
         return;
     }
-    
 
+    const spaceElement = await client.spaceElements.findFirst({
+        where: {
+            id: parsedData.data.id,
+        },
+        include: {
+            space:true,
+        }
+    })
+
+    if(!spaceElement?.space.creatorId || spaceElement.space.creatorId !== req.userId){
+        res.status(403).json({message: "You don't have permission to delete this element"});
+        return;
+    }
+
+    await client.spaceElements.delete({
+        where:{
+            id: parsedData.data.id,
+        }
+    })
+
+    res.json({
+        message: "Element deleted successfully"
+    })
+    return;
+
+}
+
+export const GetSpace = async (req: Request, res: Response)=>{
+    const space = await client.space.findUnique({
+        where: {
+            id : req.params.spaceId
+        },
+        includes: {
+            width: true,
+            height: true,
+            elements: true,
+        }
+    })
+    if(!space){
+        res.status(404).json({message: "Space not found"})
+        return;
+    }
+
+    res.json({
+        dimensions: `${space.width}x${space.height}`,
+        elements: space.elements.map((spaceElement: any) => ({
+            id: spaceElement.id,            
+            x: spaceElement.x,              
+            y: spaceElement.y,              
+            elementId: spaceElement.elementId, 
+            element: {                      // Populated the Actual Element data
+                id: spaceElement.element.id,
+                width: spaceElement.element.width,
+                height: spaceElement.element.height,
+                static: spaceElement.element.static,
+                imageUrl: spaceElement.element.imageUrl,
+            },
+        })),
+    });
+    return;
 
 }
