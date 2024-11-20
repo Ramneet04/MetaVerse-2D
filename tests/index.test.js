@@ -719,6 +719,8 @@ describe("Websockets tests", ()=> {
     let element2Id;
     let ws1;
     let ws2;
+    let w1Messages = [];
+    let w2Messages = [];
     async function SetUpHttp() {
         const username = `Ramneet- ${Math.random()}`;
         const password = "123456";
@@ -822,6 +824,14 @@ describe("Websockets tests", ()=> {
         await new Promise((r)=>{
             w2.onopen = r;
         })
+
+        w1.onmessage = (event) =>{
+            w1Messages.push(JSON.parse(event.data));
+        }
+
+        w2.onmessage = (event) =>{
+            w2Messages.push(JSON.parse(event.data));
+        }
     }
     beforeAll( async ()=>{
 
