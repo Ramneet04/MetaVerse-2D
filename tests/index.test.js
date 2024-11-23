@@ -721,6 +721,11 @@ describe("Websockets tests", ()=> {
     let ws2;
     let w1Messages = [];
     let w2Messages = [];
+    let userX;
+    let userY;
+    let adminX;
+    let adminY;
+
     async function SetUpHttp() {
         const username = `Ramneet- ${Math.random()}`;
         const password = "123456";
@@ -815,26 +820,132 @@ describe("Websockets tests", ()=> {
     }
     async function SetUpWs() {
         w1 = new WebSocket(WS_URL);
-        w2 = new WebSocket(WS_URL);
-
-        await new Promise((r)=>{
-            w1.onopen = r;
-        })
-        
-        await new Promise((r)=>{
-            w2.onopen = r;
-        })
 
         w1.onmessage = (event) =>{
             w1Messages.push(JSON.parse(event.data));
         }
 
+        await new Promise((r)=>{
+            w1.onopen = r;
+        })
+
+        w2 = new WebSocket(WS_URL);
+
         w2.onmessage = (event) =>{
             w2Messages.push(JSON.parse(event.data));
         }
+
+        await new Promise((r)=>{
+            w2.onopen = r;
+        })
+    }
+    async function waitforPopLatestMessage(messageArray){
+        return new Promise((resolve) => {
+            if(messageArray.length>0){
+                resolve(messageArray.shift());
+            }
+            else{
+                let interval = setInterval(()=>{ // repeated call and if the condition written inside the if block fullfiles then we clear the interval and this eventually stops
+                    if(messageArray.length>0){ 
+                        resolve(messageArray.shift());
+                        clearInterval(interval);
+                    }
+                }, 100)
+            }
+        })
     }
     beforeAll( async ()=>{
+        await SetUpHttp();
+        await SetUpWs();
+    })
 
+    test("get back the acknowlgement for joining the space", async ()=>{
 
+        w1.send(JSON.stringify({
+            "type": "join",
+            "payload": {
+                "spaceId": spaceId,
+                "token": admintoken,
+            }
+        }))
+
+        const message1 = waitforPopLatestMessage(w1Messages);
+
+        w1.send(JSON.stringify({
+            "type": "join",
+            "payload": {
+                "spaceId": spaceId,
+                "token": usertoken,
+            }
+        }))
+        const message2 = await waitforPopLatestMessage(w2Messages);
+
+        const message3 = await waitforPopLatestMessage(w1Messages);
+
+        expect(message1.type).toBe("space-joined")
+        expect(message2.type).toBe("space-joined")
+        expect(message1.payload.users.length).toBe(0)
+        expect(message2.payload.users.length).toBe(1)
+
+        //when user2 joins user1 gets to know that user2 has joined so as he joins we broadcast to every user in romm here only 2 user's we have, so user 1 array got a message user-joined and its position so here we are matching it.
+        expect(message3.type).toBe("user-joined")
+        expect(message3.payload.spawn.x).toBe(message2.payload.spawn.x);
+        expect(message3.payload.spawn.x).toBe(message2.payload.spawn.y);
+        expect(message3.payload.userId).toBe(userId);
+
+        adminX = message1.payload.spawn.x;
+        adminY = message1.payload.spawn.y;
+
+        userX  = message2.payload.spawn.x;
+        userY  = message2.payload.spawn.y;
+    })
+    test("user should not be able to move across around the boundary of the wall", async ()=>{
+        w1.send(JSON.stringify({
+            "type": "move",
+            "payload": {
+                x: 10000,
+                y: 10000,
+            }
+        }))
+        const message = await waitforPopLatestMessage(w1Messages);
+        expect(message.type).toBe("movement-rejected");
+        // send back to previous position
+        expect(message.payload.x).toBe(adminX)
+        expect(message.payload.y).toBe(adminY)
+    })
+    test("Users should not be able to move more than 1 block at the same time", async ()=>{
+        ws1.send(JSON.stringify({
+            type: "move",
+            payload: {
+                x: adminX + 2,
+                y: adminY
+            }
+        }));
+        const message = await waitforPopLatestMessage(w1Messages);
+        expect(message.type).toBe("movement-rejected");
+        expect(message.payload.x).toBe(adminX);
+        expect(message.payload.y).toBe(adminY);
+    })
+    test("Correct movement of a user should be broadcasted to all other users in the room", async ()=>{
+        w1.send(JSON.stringify({
+            "type": "move",
+            "payload": {
+                x: adminX + 1,
+                y: adminY,
+                userId: adminId
+            }
+        }))
+        const message = await waitforPopLatestMessage(w2Messages);
+        expect(message.type).toBe("movement");
+        expect(message.payload.x).toBe(adminX+1);
+        expect(message.payload.y).toBe(adminY);
+
+    })
+
+    test("If a user leaves other gets notified or the other user receievs an leav event", async ()=>{
+        w1.close();
+        const message = await waitforPopLatestMessage(w2Messages);
+        expect(message.type).toBe("user-left");
+        expect(message.payload.userId).toBe(adminId);
     })
 })
