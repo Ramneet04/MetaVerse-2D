@@ -9,6 +9,6 @@ adminRouter.post("/element", adminMiddleware, CreateElement )
 
 adminRouter.put("/element/:elementId", adminMiddleware, UpdateElementImage)
 
-adminRouter.post("avatar", adminMiddleware, CreateAvatar)
+adminRouter.post("/avatar", adminMiddleware, CreateAvatar)
 
 adminRouter.post("/map", adminMiddleware, CreateMap)

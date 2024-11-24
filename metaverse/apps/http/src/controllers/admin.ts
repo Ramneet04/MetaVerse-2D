@@ -54,22 +54,23 @@ export const CreateAvatar = async (req: Request, res: Response)=>{
             name: parsedData.data.name
         }
     })
-    res.json({message: "Avatar Created successfully", id: avatar.id});
+    res.json({message: "Avatar Created successfully", avatarId: avatar.id});
     return;
 }
 
 export const CreateMap = async (req: Request, res: Response)=>{
     const parsedData = CreateMapSchema.safeParse(req.body);
+    console.log("test1");
     if(!parsedData.success){
         res.status(400).json({message: "Validation failed"});
         return;
     }
-
+    console.log("test2");
     const map = await client.map.create({
         data: {
             name: parsedData.data.name,
-            width: parsedData.data.dimentions.split("x")[0], // make sure to parseINT if error arrise
-            height: parsedData.data.dimentions.split("x")[0],
+            width: parseInt(parsedData.data.dimensions.split("x")[0]), // make sure to parseINT if error arrise
+            height: parseInt(parsedData.data.dimensions.split("x")[0]),
             thumbNail: parsedData.data.thumbNail,
             mapElements: {
                 create: parsedData.data.defaultElements.map((element) => ({
@@ -80,9 +81,10 @@ export const CreateMap = async (req: Request, res: Response)=>{
             }
         }
     })
+    console.log("test3");
     res.json({
         message: "Map Created successfully",
-        id: map.id
+        mapId: map.id
     })
     return;
 }

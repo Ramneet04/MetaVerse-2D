@@ -15,8 +15,8 @@ export const  CreateSpace = async (req: Request,res: Response)=>{
         const space = await client.space.create({
             data: {
                 name: parsedData.data.name,
-                width: parsedData.data.dimentions.split("x")[0],
-                height:  parsedData.data.dimentions.split("x")[1],
+                width: parseInt(parsedData.data.dimensions.split("x")[0]),
+                height:  parseInt(parsedData.data.dimensions.split("x")[1]),
                 creatorId: req.userId
             }
         });
@@ -27,7 +27,7 @@ export const  CreateSpace = async (req: Request,res: Response)=>{
         return;
     }
     // 2nd case if mapId is present which means user is trying to create a space for the mapId already exist and we need to create a space that particular map only
-    const map = await client.map.findUnique({
+    const map = await client.map.findFirst({
         where:{
             id: parsedData.data.mapId
         },
@@ -44,34 +44,35 @@ export const  CreateSpace = async (req: Request,res: Response)=>{
     }
 
     // transactions means either both of them go through or none of them, if one fails so all the opertions in the transaction fails, so all needs to be passed if we need to create a space. more likely a ACID property.
-
-    const spaceAns = await client.$transaction(async ()=>{
-        const space = await client.space.create({
-            data: {
-                name: parsedData.data.name,
-                width: map.width,
-                height:  map.height,
-                creatorId: req.userId,
-            }
-        })
-        await client.spaceElements.createMany({
-            data: map.mapElements.map((e:any)=>(
-                {
+    try {
+        const spaceAns = await client.$transaction(async () => {
+            const space = await client.space.create({
+                data: {
+                    name: parsedData.data.name,
+                    width: map.width,
+                    height: map.height,
+                    creatorId: req.userId!,
+                },
+            });
+            await client.spaceElements.createMany({
+                data: map.mapElements.map((e: any) => ({
                     spaceId: space.id,
                     elementId: e.elementId,
-                    x: e.x,
-                    y:e.y,     
-                }
-            ))
-        })
-        return space;
-    })
-
-    res.json({
-        spaceId: spaceAns.id,
-        message: "Space created successfully",
-    })
-    return;
+                    x: e.x!,
+                    y: e.y!,
+                })),
+            });
+            return space;
+        });
+        res.json({
+            spaceId: spaceAns.id,
+            message: "Space created successfully",
+        });
+        return;
+    } catch (error) {
+        console.error("Error in transaction:", error);
+        res.status(500).json({ message: "Failed to create space" });
+    }
 
 }
 

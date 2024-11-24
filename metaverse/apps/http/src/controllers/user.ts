@@ -5,10 +5,13 @@ const client = require("@repo/db/client");
 export const UpdateMetadataController = async (req: Request, res: Response)=>{
     const parsedData = updateMetadataSchema.safeParse(req.body);
     if (!parsedData.success) {
-        res.status(400).json(parsedData.error.issues);
+        res.status(400).json({
+            message: "Invalid request body",
+        });
         return;
     }
 
+   try {
     await client.user.update({
         where: {
             id: req.userId
@@ -19,11 +22,17 @@ export const UpdateMetadataController = async (req: Request, res: Response)=>{
     })
     res.json({ message: "Metadata updated successfully" });
     return;
+   } catch (error) {
+    res.status(400).json({
+        message: "Error updating metadata",
+    })
+    return;
+   }
 }
 
 export const OthersMetadataController = async (req: Request, res: Response)=>{
     const userString = (req.query.ids ?? "[]") as string;
-    const userIds = (userString).slice(1,userString.length-2).split(",");
+    const userIds = (userString).slice(1,userString.length-1).split(",");
 
     const metadata = await client.user.findMany({
         where: {

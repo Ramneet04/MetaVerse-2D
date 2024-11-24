@@ -71,9 +71,16 @@ export const SigninController = async ( req: Request, res: Response) => {
 
 export const GetAvailableElements = async (req: Request, res: Response)=>{
     try {
-        const elements = await client.element.findMany();
-        res.status(200).json(elements); //make sure it works
-        return;
+        const elements = await client.element.findMany()
+
+    res.json({elements: elements.map((val:any) => ({
+        id: val.id,
+        imageUrl: val.imageUrl,
+        width: val.width,
+        height: val.height,
+        static: val.static
+    }))})
+    return;
     } catch (error) {
         res.status(400).json({
             message: "Internal server error"
@@ -83,8 +90,12 @@ export const GetAvailableElements = async (req: Request, res: Response)=>{
 
 export const GetAvailableAvatars = async (req: Request, res: Response)=>{
     try {
-        const avatar = await client.avatar.findMany();
-        res.status(200).json(avatar);
+        const avatars = await client.avatar.findMany();
+        res.json({avatars: avatars.map(( x:any) => ({
+            id: x.id,
+            imageUrl: x.imageUrl,
+            name: x.name
+        }))})
         return;
     } catch (error) {
         res.status(400).json({
