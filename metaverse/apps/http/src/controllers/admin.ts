@@ -31,7 +31,7 @@ export const UpdateElementImage = async (req: Request, res: Response)=>{
 
     await client.element.update({
         where: {
-            id: parsedData.data.id
+            id: req.params.elementId
         },
         data: {
             imageUrl: parsedData.data.imageUrl
@@ -70,7 +70,7 @@ export const CreateMap = async (req: Request, res: Response)=>{
         data: {
             name: parsedData.data.name,
             width: parseInt(parsedData.data.dimensions.split("x")[0]), // make sure to parseINT if error arrise
-            height: parseInt(parsedData.data.dimensions.split("x")[0]),
+            height: parseInt(parsedData.data.dimensions.split("x")[1]),
             thumbNail: parsedData.data.thumbNail,
             mapElements: {
                 create: parsedData.data.defaultElements.map((element) => ({

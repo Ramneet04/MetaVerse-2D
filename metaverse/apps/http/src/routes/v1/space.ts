@@ -9,10 +9,11 @@ spaceRouter.post("/",userMiddleware, CreateSpace)
 
 spaceRouter.delete("/:spaceId",userMiddleware, DeleteSpace);
 
+spaceRouter.delete("/element",userMiddleware, DeleteElementInSpace)
+
 spaceRouter.get("/all",userMiddleware, GetAllSpaces)
 
 spaceRouter.post("/element",userMiddleware, AddElementInSpace)
 
-spaceRouter.delete("/element",userMiddleware, DeleteElementInSpace)
 
 spaceRouter.get("/:spaceId", userMiddleware, GetSpace);

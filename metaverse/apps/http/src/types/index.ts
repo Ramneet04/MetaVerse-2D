@@ -39,7 +39,6 @@ export const CreateElementSchema = z.object({
 })
 
 export const UpdateElementSchema = z.object({
-    id: z.string(),
     imageUrl: z.string(),
 })
 
