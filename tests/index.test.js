@@ -210,7 +210,6 @@ describe("User avatar Information", ()=>{
     
 })
 
-
 describe("Space information", ()=>{
     let mapId;
     let element1Id;
