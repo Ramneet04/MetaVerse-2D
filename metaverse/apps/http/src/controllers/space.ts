@@ -89,7 +89,7 @@ export const CreateSpace = async (req: Request, res: Response) => {
 
 
 export const DeleteSpace = async (req: Request, res: Response)=>{
-
+    console.log("okk");
     const space = await client.space.findUnique({
         where:{
             id: req.params.spaceId,
@@ -141,6 +141,7 @@ export const GetAllSpaces = async (req: Request, res: Response)=>{
 }
 
 export const AddElementInSpace = async (req: Request, res: Response)=>{
+    console.log("hellooo");
     const parsedData = AddElementSchema.safeParse(req.body);
 
     if(!parsedData.success){
@@ -181,43 +182,6 @@ export const AddElementInSpace = async (req: Request, res: Response)=>{
         message: "Element added successfully"
     })
     return;
-}
-
-export const DeleteElementInSpace = async (req: Request, res: Response)=>{
-    console.log("deleteeee tessttt 0");
-    const parsedData = DeleteElementSchema.safeParse(req.body);
-    console.log("delete test1");
-    console.log(parsedData.data?.id);
-    if(!parsedData.success){
-        res.status(400).json({message: "Invalid data"});
-        return;
-    }
-    console.log("delete test2");
-    const spaceElement = await client.spaceElements.findFirst({
-        where: {
-            id: parsedData.data.id,
-        },
-        include: {
-            space:true,
-        }
-    })
-    console.log("delete test3");
-    if(!spaceElement?.space.creatorId || spaceElement.space.creatorId !== req.userId){
-        res.status(403).json({message: "You don't have permission to delete this element"});
-        return;
-    }
-
-    await client.spaceElements.delete({
-        where:{
-            id: parsedData.data.id,
-        }
-    })
-
-    res.json({
-        message: "Element deleted successfully"
-    })
-    return;
-
 }
 
 export const GetSpace = async (req: Request, res: Response)=>{

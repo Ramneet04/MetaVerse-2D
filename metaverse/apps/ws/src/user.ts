@@ -41,6 +41,7 @@ export class User {
                     console.log("jouin receiverdfd")
                     const spaceId = parsedData.payload.spaceId;
                     const token = parsedData.payload.token;
+                    console.log("token", token);
                     const userId = (jwt.verify(token, JWT_PASSWORD) as JwtPayload).userId
                     if (!userId) {
                         this.ws.close()
