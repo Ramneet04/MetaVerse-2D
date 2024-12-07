@@ -6,20 +6,39 @@ import jwt from "jsonwebtoken"
 import { JWT_PASSWORD } from "../config";
 
 export const SignupController = async (req: Request, res: Response)=>{
+   console.log(req.body.username);
+   console.log(req.body.password);
+   console.log(req.body.avatarId);
+   console.log(req.body.type);
     const parsedData = SignupSchema.safeParse(req.body);
+   console.log("hii");
     if(!parsedData.success){
         res.status(400).json({message:"Validation fail"});
         return;
     }
+    console.log('hiii22');
     try {
         const hashedPassword = await bcrypt.hash(parsedData.data.password,10);
-        const signupResponse = await client.user.create({
-            data: {
-                username: parsedData.data.username,
-                password: hashedPassword,
-                role: parsedData.data.type === "admin" ? "Admin" : 'User',
-            }
-        })
+        let signupResponse;
+        if(parsedData.data?.avatarId){
+            signupResponse = await client.user.create({
+                data: {
+                    username: parsedData.data.username,
+                    password: hashedPassword,
+                    role: parsedData.data.type === "admin" ? "Admin" : 'User',
+                    avatarId:parsedData.data.avatarId,
+                }
+            })
+        }
+        else{
+            signupResponse = await client.user.create({
+                data: {
+                    username: parsedData.data.username,
+                    password: hashedPassword,
+                    role: parsedData.data.type === "admin" ? "Admin" : 'User',
+                }
+            })
+        }
         res.status(200).json({
             message:"signup success",
             userId: signupResponse.id

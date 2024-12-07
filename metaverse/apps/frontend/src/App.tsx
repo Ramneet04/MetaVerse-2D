@@ -18,7 +18,6 @@ function App() {
         <Route path="/login" element={<LoginForm/>}></Route>
         <Route path="/arena" element={<Arena/>}></Route>
       </Routes>
-      
     </div>
     </>
   )

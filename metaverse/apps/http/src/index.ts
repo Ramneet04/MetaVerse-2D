@@ -1,9 +1,16 @@
 import express from "express"
+import cors from "cors"
 import { router } from "./routes/v1"
 const client = require("@repo/db/client");
 const app = express()
 
 app.use(express.json());
+app.use(
+	cors({
+		origin: "*",
+		credentials: true,
+	})
+);
 
 app.use("/api/v1", router);
 

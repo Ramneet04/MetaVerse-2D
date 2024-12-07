@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
+import axios from "axios"
+import { endpoints, publicEndpoints } from '@/services/apis';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import toast from "react-hot-toast";
 import { 
   Sword, 
   Shield, 
@@ -10,38 +13,64 @@ import {
   GamepadIcon, 
   StarIcon, 
   Star,
-  ImageIcon,
   UploadIcon
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
+import { Navigate, useNavigate } from 'react-router-dom';
+const {
+  GET_ALL_AVATARS
+} = publicEndpoints;
+const {
+  SIGNUP_API
+} = endpoints;
 const SignupForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState([]);
+  const [currentAvatar, setCurrentAvatar] = useState(null);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
-  const handleSignup = () => {
-    console.log('Signup', { username, password, avatar });
-  };
-
-  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatar(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  const handleSignup = async () => {
+    const BASE_URL = "http://localhost:3000/api/v1"
+    console.log('Signup', { username, password, currentAvatar });
+    const toastId = toast.loading("Loading...");
+    try {
+      console.log("hii");
+      const response = await axios.post(SIGNUP_API, {
+        username,
+        password,
+        avatarId: currentAvatar.id,
+        type:"user"
+      });
+      console.log(response);
+      if (response.status != 200) {
+        console.log(response.data.message);
+        throw new Error(response.data.message)
+      }
+      toast.success("Signup success");
+      navigate("/login");
+    } catch (error) {
+      toast.error("Signup Failed");
     }
+    toast.dismiss(toastId)
   };
 
-  const predefinedAvatars = [
-    "/api/placeholder/100/100",
-    "/api/placeholder/100/100",
-    "/api/placeholder/100/100",
-    "/api/placeholder/100/100"
-  ];
-
+  useEffect(()=>{
+    const fetchAvatar=async ()=>{
+      try {
+        const response = await axios.get(GET_ALL_AVATARS);
+        setAvatar(response.data.avatars);
+        setCurrentAvatar(response.data.avatars[0]);
+        console.log('API Response:', response.data.avatars);
+      } catch (error) {
+        console.error('Error fetching avatars:', error);
+      }finally{
+        setLoading(false)
+      }
+    }
+    fetchAvatar();
+  },[])
   return (
     <div className="w-full h-[100vh] lg:grid lg:grid-cols-2 bg-black">
               <div className="flex items-center justify-center py-12 px-4 bg-zinc-900 ">
@@ -58,39 +87,25 @@ const SignupForm = () => {
             <div className="flex justify-center items-center space-x-4">
               {/* Main Avatar */}
               <Avatar className="w-24 h-24 border-4 border-purple-600">
-                <AvatarImage src={avatar || "/api/placeholder/100/100"} alt="User Avatar" />
+                <AvatarImage src={currentAvatar?.imageUrl || "/api/placeholder/100/100"} alt="User Avatar" />
                 <AvatarFallback className="bg-zinc-800">
                   <User className="text-purple-500" />
                 </AvatarFallback>
               </Avatar>
 
               {/* Avatar Upload */}
-              <div>
-                <input 
-                  type="file" 
-                  id="avatarUpload" 
-                  accept="image/*" 
-                  className="hidden"
-                  onChange={handleAvatarUpload}
-                />
-                <label 
-                  htmlFor="avatarUpload" 
-                  className="cursor-pointer bg-zinc-800 p-2 rounded-full hover:bg-zinc-700 inline-flex items-center"
-                >
-                  <UploadIcon className="text-purple-500 mr-2" /> Upload
-                </label>
-              </div>
+              <div className='text-3xl font-bold text-white'>{currentAvatar?.name}</div>
             </div>
 
             {/* Predefined Avatar Options */}
             <div className="flex justify-center space-x-2 mb-4">
-              {predefinedAvatars.map((src, index) => (
+              {avatar?.map((data, index) => (
                 <Avatar 
                   key={index} 
-                  className="w-12 h-12 cursor-pointer hover:border-2 hover:border-purple-500"
-                  onClick={() => setAvatar(src)}
+                  className="flex justify-center items-center w-14 h-14 cursor-pointer hover:border-2 hover:border-purple-500"
+                  onClick={() => setCurrentAvatar(data)}
                 >
-                  <AvatarImage src={src} alt={`Avatar ${index + 1}`} />
+                  <AvatarImage src={data?.imageUrl} alt={`Avatar ${data.name}`} className={`${data.id===currentAvatar.id ? "border-4 border-purple-600" : ""}`}/>
                   <AvatarFallback><Star /></AvatarFallback>
                 </Avatar>
               ))}

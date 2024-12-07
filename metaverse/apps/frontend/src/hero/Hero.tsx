@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sword } from "lucide-react";
 import FeatureSection from "./feature";
+import Footer from "@/components/Footer";
 
 const HeroSection: React.FC = () => {
   return (
@@ -14,9 +15,8 @@ const HeroSection: React.FC = () => {
           Welcome to Metamove
         </h1>
         <p className="text-lg text-zinc-300 mb-6">
-          Embark on epic quests, explore legendary realms, and forge your destiny
-          in the most immersive adventure platform. Join a community of adventurers
-          and start your journey today!
+        Embark on a captivating 2D metaverse journey! Explore vibrant worlds, create your unique avatar, and forge connections in an ever-evolving digital universe.
+
         </p>
 
         {/* Call to Action */}
@@ -29,6 +29,7 @@ const HeroSection: React.FC = () => {
       </div>
     </section>
     <FeatureSection/>
+    <Footer/>
     </div>
   );
 };
