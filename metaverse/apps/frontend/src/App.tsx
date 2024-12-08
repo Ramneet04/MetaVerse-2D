@@ -4,6 +4,9 @@ import SignupForm from "./components/Signup"
 import LoginForm from "./components/Login"
 import HeroSection from "./hero/Hero"
 import Arena from "./game/Game"
+import Dashboard from "./pages/Dashboard"
+import MyProfile from "./components/Dashboard/myprofile"
+import Settings from "./components/Dashboard/settings"
 
 
 function App() {
@@ -17,7 +20,15 @@ function App() {
         <Route path="/signup" element={<SignupForm/>}></Route>
         <Route path="/login" element={<LoginForm/>}></Route>
         <Route path="/arena" element={<Arena/>}></Route>
+
+        <Route element={<Dashboard/>}>
+
+        <Route path="dashboard/my-profile" element={<MyProfile/>}></Route>
+        <Route path="dashboard/settings" element={<Settings/>}></Route>
+
+        </Route>
       </Routes>
+
     </div>
     </>
   )

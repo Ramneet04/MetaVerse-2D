@@ -59,10 +59,16 @@ export const SigninController = async ( req: Request, res: Response) => {
 
     try {
         const user = await client.user.findUnique({
-            where: {
-                username: parsedData.data.username
-            } 
-        })
+            where: { username: parsedData.data.username },
+            include: {
+              avatar: {
+                select: {
+                  imageUrl: true,
+                },
+              },
+              spaces: true, // Fetches all spaces associated with the user
+            },
+          });
         if(!user){
             res.status(403).json({message:"User not found"})
             return;
@@ -79,6 +85,7 @@ export const SigninController = async ( req: Request, res: Response) => {
 
         res.status(200).json({
             token,
+            user,
             message:"signIn success"
         })
     } catch (error) {

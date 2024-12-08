@@ -6,47 +6,27 @@ import { LogIn } from "lucide-react";
 import toast from 'react-hot-toast';
 import { endpoints } from '@/services/apis';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { login } from '@/services/operations/authApi';
 const {
   LOGIN_API
 } = endpoints;
 
 const LoginForm: React.FC = () => {
-
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loginData, setLoginData] = useState({
     username: "",
     password: "",
   });
 
-  const handleLogin = async ()=>{
-    const toastId = toast.loading("Loading...");
-    try {
-      const {
-        username,
-        password
-      } = loginData;
-      console.log("hii");
-      console.log(loginData.username);
-      const response = await axios.post(LOGIN_API, {
-        username,
-        password
-      });
-      console.log(response);
-      if (response.status !== 200) {
-        console.log(response.data.message);
-        throw new Error(response.data.message)
-      }
-      toast.success("Login success");
-      navigate("/dashbaord");
-    } catch (error) {
-      console.log(error);
-      toast.error("Login Failed");
-    }
-    toast.dismiss(toastId)
-  }
   const handleSubmit = (e)=>{
     e.preventDefault();
-    handleLogin();
+    const {
+      username,
+      password
+    } = loginData;
+    dispatch(login(username,password,navigate));
   }
   return (
     <div className="min-h-screen bg-zinc-900 flex items-center justify-center text-zinc-100">
